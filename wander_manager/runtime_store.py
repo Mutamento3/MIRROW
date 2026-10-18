@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import Any, Iterator, Optional
 from uuid import uuid4
 
+from .goal_policy import get_activity_goal_policy
+
 from .runtime_models import (
     ActivityState, DecisionPhase, GoalMode, NodeState, RunState,
     SettlementReason, WanderActivity, WanderNode, WanderRun, now_iso,
@@ -26,6 +28,26 @@ _INLINE_SECRET_PATTERN = re.compile(
 )
 _BEARER_PATTERN = re.compile(r"(?i)\bBearer\s+[^\s,;]+")
 _IPV4_PATTERN = re.compile(r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])")
+_SQLITE_INT_MAX = 2**63 - 1
+
+
+def _sqlite_integer(value: Any, *, field: str) -> int:
+    """Reject values SQLite cannot safely persist as INTEGER.
+
+    Model output must not silently turn an unbounded autonomous estimate into
+    an overflow or a driver-specific float/string coercion.
+    """
+    if isinstance(value, bool):
+        raise ValueError(f"{field} must be a SQLite integer")
+    if isinstance(value, float) and not value.is_integer():
+        raise ValueError(f"{field} must be a SQLite integer")
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(f"{field} must be a SQLite integer") from exc
+    if not -_SQLITE_INT_MAX - 1 <= parsed <= _SQLITE_INT_MAX:
+        raise ValueError(f"{field} exceeds SQLite integer range")
+    return parsed
 
 
 def redact_sensitive(value: Any) -> Any:
@@ -540,21 +562,22 @@ class WanderRuntimeStore:
         data = activity.to_dict()
         with self._connection() as conn:
             conn.execute("""INSERT INTO wander_activities VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(activity_id) DO UPDATE SET state=excluded.state, interrupt_requested=excluded.interrupt_requested,
+                ON CONFLICT(activity_id) DO UPDATE SET state=excluded.state, goal_mode=excluded.goal_mode, goal_value=excluded.goal_value,
+                reason=excluded.reason, interrupt_requested=excluded.interrupt_requested,
                 next_node_at=excluded.next_node_at, timer_ends_at=excluded.timer_ends_at, ended_at=excluded.ended_at,
                 settlement_reason=excluded.settlement_reason, abort_reason=excluded.abort_reason, summary=excluded.summary,
                 emotion_effect=excluded.emotion_effect, share_decision=excluded.share_decision,
                 continue_next=excluded.continue_next, next_inclination_note=excluded.next_inclination_note,
                 updated_at=excluded.updated_at""",
                 (data["activity_id"], data["run_id"], data["activity_type"], data["state"], data["order_index"],
-                 data["goal_mode"], data["goal_value"], _text(data["reason"]), int(data["interrupt_requested"]),
+                 data["goal_mode"], None if data["goal_value"] is None else _sqlite_integer(data["goal_value"], field="goal_value"), _text(data["reason"]), int(data["interrupt_requested"]),
                  data["next_node_at"], data["timer_ends_at"], data["ended_at"], data["settlement_reason"],
                  _text(data["abort_reason"]), _text(data["summary"]), _json(data["emotion_effect"]),
                  None if data["share_decision"] is None else int(data["share_decision"]),
                  None if data["continue_next"] is None else int(data["continue_next"]), _text(data["next_inclination_note"]),
                  data["created_at"], data["updated_at"]))
 
-    def save_plan(self, run: WanderRun, activities: list[WanderActivity]) -> None:
+    def save_plan(self, run: WanderRun, activities: list[WanderActivity], reviewed_node: Optional[WanderNode] = None) -> None:
         """Atomically persist one accepted plan; callers validate it before state changes."""
         if not activities:
             raise ValueError("plan has no activities")
@@ -564,6 +587,10 @@ class WanderRuntimeStore:
             raise ValueError("activity_id must be unique within a plan")
         if len({activity.order_index for activity in activities}) != len(activities):
             raise ValueError("order_index must be unique within a plan")
+        if reviewed_node is not None:
+            node_activity = next((item for item in activities if item.activity_id == reviewed_node.activity_id), None)
+            if node_activity is None or node_activity.run_id != run.run_id:
+                raise ValueError("reviewed node activity must belong to this atomic plan save")
         run_data = run.to_dict()
         with self._connection() as conn:
             conn.execute("""INSERT INTO wander_runs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -577,14 +604,28 @@ class WanderRuntimeStore:
             for activity in activities:
                 data = activity.to_dict()
                 conn.execute("""INSERT INTO wander_activities VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ON CONFLICT(activity_id) DO UPDATE SET state=excluded.state, interrupt_requested=excluded.interrupt_requested,
+                    ON CONFLICT(activity_id) DO UPDATE SET state=excluded.state, goal_mode=excluded.goal_mode, goal_value=excluded.goal_value,
+                    reason=excluded.reason, interrupt_requested=excluded.interrupt_requested,
                     next_node_at=excluded.next_node_at, timer_ends_at=excluded.timer_ends_at, ended_at=excluded.ended_at,
                     settlement_reason=excluded.settlement_reason, abort_reason=excluded.abort_reason, summary=excluded.summary,
                     emotion_effect=excluded.emotion_effect, share_decision=excluded.share_decision,
                     continue_next=excluded.continue_next, next_inclination_note=excluded.next_inclination_note, updated_at=excluded.updated_at""",
-                    (data["activity_id"], data["run_id"], data["activity_type"], data["state"], data["order_index"], data["goal_mode"], data["goal_value"], _text(data["reason"]), int(data["interrupt_requested"]),
+                    (data["activity_id"], data["run_id"], data["activity_type"], data["state"], _sqlite_integer(data["order_index"], field="order_index"), data["goal_mode"], None if data["goal_value"] is None else _sqlite_integer(data["goal_value"], field="goal_value"), _text(data["reason"]), int(data["interrupt_requested"]),
                      data["next_node_at"], data["timer_ends_at"], data["ended_at"], data["settlement_reason"], _text(data["abort_reason"]), _text(data["summary"]), _json(data["emotion_effect"]),
                      None if data["share_decision"] is None else int(data["share_decision"]), None if data["continue_next"] is None else int(data["continue_next"]), _text(data["next_inclination_note"]), data["created_at"], data["updated_at"]))
+            if reviewed_node is not None:
+                data = reviewed_node.to_dict()
+                conn.execute("""INSERT INTO wander_nodes VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(node_id) DO UPDATE SET state=excluded.state, source_summary=excluded.source_summary,
+                    source_payload=excluded.source_payload, reflection=excluded.reflection, emotion_effect=excluded.emotion_effect,
+                    continue_activity=excluded.continue_activity, abort_reason=excluded.abort_reason, started_at=excluded.started_at,
+                    completed_at=excluded.completed_at, execution_status=excluded.execution_status, completion_signal=excluded.completion_signal,
+                    retry_safe=excluded.retry_safe, side_effect_refs=excluded.side_effect_refs, execution_error=excluded.execution_error, updated_at=excluded.updated_at""",
+                    (data["node_id"], data["activity_id"], _sqlite_integer(data["round_index"], field="round_index"), data["state"], _text(data["source_summary"]),
+                     _json(data["source_payload"]), _text(data["reflection"]), _json(data["emotion_effect"]),
+                     None if data["continue_activity"] is None else int(data["continue_activity"]), _text(data["abort_reason"]),
+                     data["started_at"], data["completed_at"], data["execution_status"], _text(data["completion_signal"]), int(data["retry_safe"]),
+                     _json(data["side_effect_refs"]), _text(data["execution_error"]), data["created_at"], data["updated_at"]))
 
     def save_node(self, node: WanderNode) -> None:
         data = node.to_dict()
@@ -595,7 +636,7 @@ class WanderRuntimeStore:
                 continue_activity=excluded.continue_activity, abort_reason=excluded.abort_reason, started_at=excluded.started_at,
                 completed_at=excluded.completed_at, execution_status=excluded.execution_status, completion_signal=excluded.completion_signal,
                 retry_safe=excluded.retry_safe, side_effect_refs=excluded.side_effect_refs, execution_error=excluded.execution_error, updated_at=excluded.updated_at""",
-                (data["node_id"], data["activity_id"], data["round_index"], data["state"], _text(data["source_summary"]),
+                (data["node_id"], data["activity_id"], _sqlite_integer(data["round_index"], field="round_index"), data["state"], _text(data["source_summary"]),
                  _json(data["source_payload"]), _text(data["reflection"]), _json(data["emotion_effect"]),
                  None if data["continue_activity"] is None else int(data["continue_activity"]), _text(data["abort_reason"]),
                  data["started_at"], data["completed_at"], data["execution_status"], _text(data["completion_signal"]), int(data["retry_safe"]),
@@ -1021,7 +1062,7 @@ class WanderRuntimeStore:
             ).fetchone()
             schedule_projection = dict(schedule_row) if schedule_row is not None else {}
             rows = conn.execute(
-                f"""SELECT a.*, r.trigger_reason, r.state AS run_state, r.outcome AS run_outcome,
+                f"""SELECT a.*, r.trigger_reason, r.context_snapshot AS run_context_snapshot, r.state AS run_state, r.outcome AS run_outcome,
                     r.created_at AS run_created_at,
                     r.ended_at AS run_ended_at,
                     COUNT(*) OVER (PARTITION BY a.run_id) AS run_activity_count,
@@ -1039,6 +1080,10 @@ class WanderRuntimeStore:
             logs = []
             for row in rows:
                 item = dict(row)
+                goal_policy = get_activity_goal_policy({
+                    "trigger_reason": item["trigger_reason"],
+                    "context_snapshot": _load_json(item.get("run_context_snapshot") or "{}"),
+                }, item)
                 # Legacy rows are intentionally not migrated.  When an old
                 # planned activity belongs to a terminal run, project the
                 # truthful UI state at read time instead of mutating history.
@@ -1169,6 +1214,9 @@ class WanderRuntimeStore:
                         "nodes": node_projection,
                         "goal_mode": item["goal_mode"],
                         "goal_value": item["goal_value"],
+                        "goal_completion": goal_policy.get("completion", "fixed"),
+                        "initial_goal_value": goal_policy.get("initial_goal_value", item["goal_value"]),
+                        "extensions_total": goal_policy.get("extensions_total", 0),
                         "settlement_reason": item["settlement_reason"],
                         "delivery_status": item["delivery_status"] or "not_created",
                         "trigger_reason": item["trigger_reason"],

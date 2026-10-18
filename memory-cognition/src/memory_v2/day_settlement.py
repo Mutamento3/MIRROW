@@ -193,11 +193,11 @@ class ParsedDaySettlement:
 
 
 def _timestamp(value: str) -> datetime:
+    from .source_time import instant
     try:
-        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        return instant(value)
     except ValueError as exc:
         raise DaySettlementContractError("event reported_at must be ISO-8601") from exc
-    return parsed if parsed.tzinfo is not None else parsed.replace(tzinfo=timezone.utc)
 
 
 def _validate_ref(value: str, label: str) -> None:

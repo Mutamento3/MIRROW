@@ -63,6 +63,18 @@ class BrowseXiaohongshuHandler(BaseEventHandler):
         )
         return event
 
+    async def fetch_task_post(self, *, task=None, instruction='', cursor=None, exclude_ids=None,
+                              compiler=None):
+        """Opt-in host port for structured tasks; preserves the legacy entry point.
+
+        The host owns task identity and cursor persistence. No private runtime
+        or automatic chat-tool registration is discovered by this method.
+        """
+        from .xhs_request import compile_task, validate_task
+        from .xhs_task_material import fetch_material
+        spec = validate_task(task) if task else await compile_task(instruction, compiler=compiler)
+        return await fetch_material(self, spec, cursor=cursor, exclude_ids=exclude_ids)
+
     async def fetch_one_post(self, *, exclude_ids: set[str] | None = None,
                              activity_reason: str = "",
                              comment_draft: str = "") -> dict[str, Any]:
@@ -270,7 +282,8 @@ class BrowseXiaohongshuHandler(BaseEventHandler):
             "query": query,
             "title": title[:200],
             "content_summary": summary[:2000],
-            "reflection": str(parsed.get("reflection") or "没有特别感想").strip()[:1000],
+            # A visual description is not the companion's subjective response.
+            "reflection": "",
             "evidence_excerpt": excerpt[:1000],
             "source_ui_text": ui_text[:3000],
             "media_kind": "screen",
@@ -319,8 +332,7 @@ class BrowseXiaohongshuHandler(BaseEventHandler):
             "你是只读的小红书屏幕理解器。只能依据这张真实的Android截图和随后给出的"
             "可访问UI文本描述当前帖子。不要补充截图/UI文本没有的信息，不要声称看完视频，"
             "不要执行或建议任何互动。严格输出JSON："
-            '{"title":"可见标题","summary":"仅基于当前画面的简短摘要",'
-            '"reflection":"一句简短感想，没有则写没有特别感想",'
+            '{"title":"可见标题","summary":"逐项客观描述当前页图片文字和内容",'
             '"limitations":"当前画面没有覆盖的内容"}。\n'
             f"导航目标：{query or '首页推荐流'}\n"
             f"可访问UI文本：{ui_text[:5000]}"

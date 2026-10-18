@@ -35,6 +35,7 @@ from .runtime_models import (
 )
 from .runtime_store import WanderRuntimeStore
 from .timing_policy import DEFAULT_DELAY_SECONDS, normalize_delay_seconds
+from .goal_policy import normalize_extension
 from .self_reflection_adapter import SelfReflectionAdapter, SelfReflectionContext
 from .wish_commit_adapter import WishCommitAdapter
 
@@ -929,6 +930,9 @@ class WanderRuntimeRunner:
             abort_reason=review.abort_reason,
             next_node_at=next_node_at,
             switch_to=review.switch_to,
+            extend_count=review.extend_count,
+            goal_reason=review.goal_reason,
+            switch_goal=review.switch_goal,
         )
 
     async def _settle(self, action: RuntimeAction, bundle: RuntimeContextBundle) -> None:
@@ -1273,6 +1277,9 @@ class WanderRuntimeRunner:
                 timing_source=str(raw.get("timing_source") or "fallback"),
                 next_node_at=str(raw.get("next_node_at") or ""),
                 switch_to=self._restore_switch_to(raw, item),
+                extend_count=normalize_extension(raw.get("extend_count")),
+                goal_reason=str(raw.get("goal_reason") or ""),
+                switch_goal=raw.get("switch_goal") if isinstance(raw.get("switch_goal"), dict) else None,
             )
         return None
 

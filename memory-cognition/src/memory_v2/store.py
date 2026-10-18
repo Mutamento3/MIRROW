@@ -2899,8 +2899,8 @@ class MemoryV2Store:
 
     @staticmethod
     def _event_time_key(value: str) -> datetime:
-        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-        return parsed if parsed.tzinfo is not None else parsed.replace(tzinfo=timezone.utc)
+        from .source_time import instant
+        return instant(value)
 
     @staticmethod
     def _event_scope(

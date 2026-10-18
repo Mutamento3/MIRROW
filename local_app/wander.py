@@ -103,6 +103,7 @@ class Wander:
         return await runtime_context(recipe, **kwargs)
 
     async def context(self):
+        from wander_manager.body_knowledge import body_overview
         rows = self.messages.messages()
         active = self.lifecycle.days.active() if self.lifecycle else None
         day = active['date'] if active else datetime.now().date().isoformat()
@@ -113,7 +114,7 @@ class Wander:
             today_conversation=conversation)
         return RuntimeContextBundle(plan=RuntimeContext(**common), decision=DecisionContext(**common),
             self_reflection=SelfReflectionContext(**common,
-                capability_catalog='可用：关键词联想、回看已编码记忆、自省与许愿板。设备、会客和淘宝未接入。',
+                capability_catalog=body_overview() + '\n[本宿主接入事实]\n当前只接通关键词联想、回看已编码记忆、自省与许愿板；设备、会客和淘宝未接入。',
                 wish_context=json.dumps(self.wishes.list_all(include_threads=True), ensure_ascii=False),
                 existing_self_book=self.memory.core_context()))
 

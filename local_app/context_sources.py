@@ -37,8 +37,10 @@ class ContextSources:
         return [row for row in rows if row['active_date'] in retained], diaries
 
     async def facts(self, query='', *, active_date=None):
+        from wander_manager.body_knowledge import body_overview
         profile = self.store.profile()
         facts = {'human_display_name': profile['human_name'], 'agent_display_name': profile['agent_name'],
+            'published_body': {'overview': body_overview(), 'scope': 'published_components_not_live_device_status'},
             'core_self': books.core_context(),
             'other_cognition': {'core': other_book.context(core=True, interlocutor_ids=['human']),
                 'retrieved': other_book.context(interlocutor_ids=['human'], user_message=query)},

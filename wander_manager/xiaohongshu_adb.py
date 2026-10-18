@@ -423,6 +423,25 @@ class AdbXiaohongshuSource:
         finally:
             lease.release()
 
+    async def fetch_task(self, *, task: dict, cursor: dict | None = None,
+                         exclude_ids: set[str] | None = None) -> dict[str, Any]:
+        """One observed article; the host commits a successful cursor explicitly."""
+        from .xhs_request import validate_task
+        task = validate_task(task)
+        if task['operation'] == 'continue':
+            return {'status': 'resume_requires_runtime'}
+        if task['operation'] == 'profile':
+            from .xhs_profile_navigation import fetch_profile
+            cursor = cursor or {}
+            count = cursor.get('read_count', 0)
+            if not isinstance(count, int) or isinstance(count, bool) or count < 0:
+                return {'status': 'profile_cursor_ambiguous'}
+            if task['scope'] == 'count' and count >= task['goal_count']:
+                return {'status': 'profile_target_reached'}
+            return await fetch_profile(self, task, cursor)
+        return await self.fetch_one(query=task['query'] if task['operation'] == 'search' else '',
+                                    exclude_ids=exclude_ids)
+
     async def _fetch_one(
         self,
         *,
@@ -654,7 +673,17 @@ class AdbXiaohongshuSource:
             logger.warning("blocked non-whitelisted ADB operation")
             return None
         try:
-            result = self._runner(argv, self.command_timeout_seconds)
+            if self._runner is _default_runner:
+                pending = asyncio.create_task(asyncio.to_thread(self._runner, argv, self.command_timeout_seconds))
+                try:
+                    result = await asyncio.shield(pending)
+                except asyncio.CancelledError:
+                    # A cancelled coroutine cannot release the device lease
+                    # while the fixed subprocess is still acting on the phone.
+                    await asyncio.shield(pending)
+                    raise
+            else:
+                result = self._runner(argv, self.command_timeout_seconds)
         except TypeError:
             # Tiny test doubles often accept only argv.  This compatibility
             # branch does not alter the production fixed-argv boundary.
@@ -714,6 +743,8 @@ class AdbXiaohongshuSource:
             ("shell", "input", "keyevent", "KEYCODE_WAKEUP"),
             ("shell", "input", "keyevent", "KEYCODE_BACK"),
             ("shell", "input", "swipe", "540", "1900", "540", "700", "280"),
+            ("shell", "input", "swipe", "900", "900", "180", "900", "280"),
+            ("shell", "input", "swipe", "540", "1800", "540", "1200", "700"),
         }:
             return True
         if len(parts) == 5 and parts[:3] == ("shell", "input", "tap"):

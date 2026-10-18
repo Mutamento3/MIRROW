@@ -17,6 +17,7 @@ from .flash_structured import FlashJsonResult, call_flash_json_detailed
 from .runtime_models import ActivityState, DecisionPhase, NodeState, SettlementReason
 from .runtime_store import WanderRuntimeStore, redact_sensitive
 from .timing_policy import normalize_delay_seconds
+from .goal_policy import get_activity_goal_policy, is_autonomous_run, normalize_extension
 
 
 @dataclass
@@ -56,6 +57,9 @@ class NodeReviewDecision:
     timing_reason: str = ""
     timing_source: str = "fallback"
     next_node_at: str = ""
+    extend_count: int = 0
+    goal_reason: str = ""
+    switch_goal: Optional[dict[str, Any]] = None
 
 
 @dataclass
@@ -168,6 +172,13 @@ def _runtime_block(
     if run:
         timing = (run.get("context_snapshot") or {}).get("timing") or {}
         parts.append(f"[计划时间事实]\nhorizon_mode={timing.get('horizon_mode', 'deadline')}；horizon_at={run.get('next_wake_at') or '无'}")
+        policy = get_activity_goal_policy(run, activity)
+        parts.append(
+            f"[目标事实]\nautonomy_version={1 if is_autonomous_run(run) else 0}；"
+            f"completion={policy.get('completion', 'fixed')}；"
+            f"initial_goal_value={policy.get('initial_goal_value', activity.get('goal_value'))}；"
+            f"extensions_total={policy.get('extensions_total', 0)}"
+        )
     if current_node is not None:
         parts.append(
             "[当前节点真实材料]\n"
@@ -208,8 +219,8 @@ def _predecessor_activities(store: WanderRuntimeStore, activity: dict[str, Any])
 
 
 _NODE_REVIEW_INSTRUCTION = """只输出 JSON 对象：
-{"reflection":"没有深入感想时写没有感想","emotion_effect":{"changed":false,"from":"","to":"","delta":"变化描述","confidence":0.0},"continue_activity":true,"abort_reason":"","switch_to":null,"next_node_delay_seconds":900,"timing_reason":""}
-continue_activity 表示是否继续当前活动。当为 false 且你不想就此结束漫想、而是想换去做另一件事时，用 switch_to 指定新活动（{"event_type":"事件类型","reason":"为什么想做这个"}）；否则为 null。若继续，请自主填写到下一节点前等待的秒数 next_node_delay_seconds 和 timing_reason；900 只是 JSON 示例，不是固定要求。你可以选择很久的休息；系统只会把 0 调整为至少 5 秒以避免空转。
+{"reflection":"没有深入感想时写没有感想","emotion_effect":{"changed":false,"from":"","to":"","delta":"变化描述","confidence":0.0},"continue_activity":true,"abort_reason":"","extend_count":0,"goal_reason":"","switch_to":null,"switch_goal":null,"next_node_delay_seconds":900,"timing_reason":""}
+continue_activity 表示是否继续当前活动。当 count 的预计目标刚达成时，只有明确继续并填写正整数 extend_count 才会续作；extend_count 是当前节点之后追加的数量，不是新的总数，goal_reason 写本次续作的实际缘由。open_ended 是否继续也由你决定。当为 false 且你不想就此结束漫想、而是想换去做另一件事时，用 switch_to 指定新活动（{"event_type":"事件类型","reason":"为什么想做这个"}），并用 switch_goal 指定 {"mode","value","completion"}；否则为 null。若继续，请自主填写到下一节点前等待的秒数 next_node_delay_seconds 和 timing_reason；900 只是 JSON 示例，不是固定要求。你可以选择很久的休息；系统只会把 0 调整为至少 5 秒以避免空转。
 emotion_effect 只描述 AI 因这次当前活动而新产生或变化的自身心情；材料里其他人的情绪、旧记录里的历史情绪、t/l/s 等机器状态都不是 AI 当前的心情。from/to 必须是自然语言心情，无法确认时 changed=false。
 不要声称做过真实材料中没有发生的事情。"""
 
@@ -420,6 +431,8 @@ class NodeReviewAdapter(_DecisionAdapterBase):
         if not continue_activity and not abort_reason and switch_to is None:
             abort_reason = "自然停下"
         delay, source = normalize_delay_seconds(raw.get("next_node_delay_seconds"))
+        extend_count = normalize_extension(raw.get("extend_count"))
+        switch_goal = raw.get("switch_goal") if isinstance(raw.get("switch_goal"), dict) else None
         return NodeReviewDecision(
             reflection=reflection,
             emotion_effect=_normalize_effect(raw.get("emotion_effect")),
@@ -429,6 +442,9 @@ class NodeReviewAdapter(_DecisionAdapterBase):
             next_node_delay_seconds=delay,
             timing_reason=str(raw.get("timing_reason") or "").strip()[:300],
             timing_source=source,
+            extend_count=extend_count,
+            goal_reason=str(raw.get("goal_reason") or "").strip()[:300],
+            switch_goal=switch_goal,
         )
 
     def _record_review_failure(

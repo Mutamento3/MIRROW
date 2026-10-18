@@ -47,6 +47,11 @@ events/
 buckets/
 memory/
 Memory_*/
+# Windows ignore-case matching also catches the public memory_v2 source package.
+# Admit source only; runtime data and caches remain excluded.
+!/memory-cognition/src/memory_v2/
+/memory-cognition/src/memory_v2/*
+!/memory-cognition/src/memory_v2/*.py
 world_book/entries/
 scp_encyclopedia/entries/
 backups/

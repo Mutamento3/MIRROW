@@ -11,8 +11,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Awaitable, Callable, Optional
 
-from .event_catalog import EVENT_CATALOG, normalize_goal
+from .event_catalog import EVENT_CATALOG
 from .event_types import EventType
+from .goal_policy import normalize_goal_policy
 from .flash_structured import FlashJsonResult, call_flash_json_detailed
 from .runtime_models import DecisionPhase, GoalMode, WanderRun
 from .runtime_store import WanderRuntimeStore
@@ -45,6 +46,7 @@ class ActivitySpec:
     goal_mode: GoalMode
     goal_value: Optional[int]
     reason: str = ""
+    completion: str = "fixed"
 
 
 @dataclass(frozen=True)
@@ -53,6 +55,7 @@ class PlanDecision:
     horizon_min: int
     raw_plan: dict[str, Any]
     horizon_mode: str = "deadline"
+    autonomous_goals: bool = False
 
 
 def _event_from_value(value: Any) -> Optional[EventType]:
@@ -160,8 +163,9 @@ def build_runtime_block(
 
 
 _OUTPUT_INSTRUCTION = """根据上述真实状态，仅输出 JSON 对象：
-{"horizon_min":预计分钟数,"horizon_mode":"estimate|deadline","activities":[{"event_type":"事件类型","goal":{"mode":"count|duration|open_ended|single|external_signal","value":整数或null},"reason":"简短原因"}]}
+{"horizon_min":预计分钟数,"horizon_mode":"estimate|deadline","activities":[{"event_type":"事件类型","goal":{"mode":"count|duration|open_ended|single|external_signal","value":整数或null,"completion":"estimate|fixed"},"reason":"简短原因"}]}
 estimate 表示到这个时间只做一次是否继续的复核，不会直接截断活动；deadline 只用于你明确希望到点结束的计划。
+count/open_ended 的 completion 默认为 estimate：value 是先做多少的预计目标，达到后由你在节点复核中决定继续多少或结束；只有明确希望到点/到数即结束才填 fixed。duration、single、external_signal 必须为 fixed。
 初始只选择此刻真正想先做的 1 项；不要预先把候选活动排满。若做的过程中自然想转去另一件事，节点复核阶段仍可现场续作。event_type 必须来自可做事件列表。你的选择来自你的内心状态，用户状态仅作背景参考，不要只围绕用户。不要声称已执行任何事情。"""
 
 
@@ -278,9 +282,9 @@ class PlanDecisionAdapter:
     def _decision_dict(decision: Optional[PlanDecision]) -> dict[str, Any]:
         if decision is None:
             return {}
-        return {"horizon_min": decision.horizon_min, "horizon_mode": decision.horizon_mode, "activities": [
+        return {"horizon_min": decision.horizon_min, "horizon_mode": decision.horizon_mode, "autonomous_goals": decision.autonomous_goals, "activities": [
             {"event_type": item.event_type.value,
-             "goal": {"mode": item.goal_mode.value, "value": item.goal_value}, "reason": item.reason}
+             "goal": {"mode": item.goal_mode.value, "value": item.goal_value, "completion": item.completion}, "reason": item.reason}
             for item in decision.activities
         ]}
 
@@ -319,10 +323,10 @@ class PlanDecisionAdapter:
             if event_type is None or event_type not in allowed or event_type in seen_events:
                 continue
             goal = raw.get("goal") if isinstance(raw.get("goal"), dict) else {}
-            goal_mode, value = normalize_goal(event_type, goal.get("mode"), goal.get("value"))
-            activities.append(ActivitySpec(event_type, goal_mode, value, str(raw.get("reason") or "")))
+            goal_mode, value, completion = normalize_goal_policy(event_type, goal, autonomous=True)
+            activities.append(ActivitySpec(event_type, goal_mode, value, str(raw.get("reason") or ""), completion))
             seen_events.add(event_type)
-        return PlanDecision(tuple(activities), horizon, payload, horizon_mode) if activities else None
+        return PlanDecision(tuple(activities), horizon, payload, horizon_mode, autonomous_goals=True) if activities else None
 
 
 def _usage_value(usage: dict[str, Any], *keys: str) -> Optional[int]:

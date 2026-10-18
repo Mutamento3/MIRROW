@@ -177,8 +177,8 @@ class BoundaryLinkScreening:
 
 
 def _timestamp(value: str) -> datetime:
-    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    return parsed if parsed.tzinfo is not None else parsed.replace(tzinfo=timezone.utc)
+    from .source_time import instant
+    return instant(value)
 
 
 def _stable_boundary_id(previous_batch_id: str, next_batch_id: str) -> str:

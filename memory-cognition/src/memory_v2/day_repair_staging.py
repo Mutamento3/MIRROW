@@ -164,10 +164,8 @@ def _event_rows(
 
 
 def _event_time_key(value: str) -> datetime:
-    parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-    if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
-    return parsed.astimezone(timezone.utc)
+    from .source_time import instant
+    return instant(value)
 
 
 def _source_sets(

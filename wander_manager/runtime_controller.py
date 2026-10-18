@@ -13,6 +13,7 @@ from typing import Callable, Optional
 
 from .event_catalog import strategy_for
 from .event_types import EventType
+from .goal_policy import get_activity_goal_policy, is_autonomous_run, normalize_extension, normalize_switch_goal
 from .plan_decision_adapter import PlanDecision
 from .runtime_models import (ActivityState, GoalMode, NodeState, RunState,
     SettlementReason, WanderActivity, WanderNode, WanderRun)
@@ -68,6 +69,19 @@ class WanderRuntimeController:
         # old in-flight runs have no key and therefore retain deadline semantics.
         run.context_snapshot = dict(run.context_snapshot or {})
         run.context_snapshot["timing"] = {"horizon_mode": plan.horizon_mode}
+        if plan.autonomous_goals and run.trigger_reason != "chat_tool":
+            run.context_snapshot["autonomy"] = {
+                "version": 1,
+                "activity_goal_policies": {
+                    item.activity_id: {
+                        "completion": spec.completion,
+                        "initial_goal_value": item.goal_value,
+                        "extensions_total": 0,
+                        "reason": spec.reason[:300],
+                    }
+                    for item, spec in zip(activities, plan.activities)
+                },
+            }
         run.transition_to(RunState.ACTIVE_WAIT)
         self.store.save_plan(run, activities)
         return activities
@@ -171,16 +185,17 @@ class WanderRuntimeController:
         node.started_at = self._iso(now)
         activity.transition_to(ActivityState.NODE_RUNNING)
         run.transition_to(RunState.NODE_RUNNING)
-        self.store.save_node(node)
-        self.store.save_activity(activity)
-        self.store.save_run(run)
+        self.store.save_plan(run, [activity], reviewed_node=node)
         return node
 
     def complete_node_review(self, node_id: str, *, reflection: str = "", emotion_effect: Optional[dict] = None,
                              continue_activity: bool = True, abort_reason: str = "",
                              next_node_at: Optional[datetime] = None,
                              execution_failed: bool = False,
-                             switch_to: Optional[tuple[EventType, str]] = None) -> RuntimeAction:
+                             switch_to: Optional[tuple[EventType, str]] = None,
+                             extend_count: int = 0,
+                             goal_reason: str = "",
+                             switch_goal: Optional[dict] = None) -> RuntimeAction:
         node = self._node_required(node_id)
         if node.state != NodeState.RUNNING:
             raise ValueError("only a running node can be reviewed")
@@ -196,16 +211,30 @@ class WanderRuntimeController:
         node.completed_at = self._iso(self.clock())
         activity.transition_to(ActivityState.NODE_REVIEW)
         run.transition_to(RunState.NODE_REVIEW)
-        self.store.save_node(node)
         now = self.clock()
-        count_reached = activity.goal_mode in (GoalMode.COUNT, GoalMode.SINGLE) and node.round_index >= (activity.goal_value or 1)
-        open_limit = activity.goal_mode == GoalMode.OPEN_ENDED and node.round_index >= self.max_open_nodes
+        policy = get_activity_goal_policy(run, activity)
+        autonomous_goal = is_autonomous_run(run) and policy.get("completion") == "estimate"
         timer_done = bool(activity.timer_ends_at and now >= self._parse(activity.timer_ends_at))
+        horizon_done = bool(run.next_wake_at and now >= self._parse(run.next_wake_at) and self._horizon_mode(run) == "deadline")
+        count_reached = activity.goal_mode in (GoalMode.COUNT, GoalMode.SINGLE) and node.round_index >= (activity.goal_value or 1)
+        if (activity.goal_mode == GoalMode.COUNT and count_reached and autonomous_goal
+                and not activity.interrupt_requested and not execution_failed
+                and not timer_done and not horizon_done):
+            extension = normalize_extension(extend_count)
+            if continue_activity and not abort_reason and extension and node.round_index <= 2**63 - 1 - extension:
+                activity.goal_value = node.round_index + extension
+                policies = run.context_snapshot["autonomy"]["activity_goal_policies"]
+                policy = dict(policies.get(activity.activity_id) or policy)
+                policy["extensions_total"] = int(policy.get("extensions_total") or 0) + extension
+                policy["reason"] = goal_reason[:300]
+                policies[activity.activity_id] = policy
+                count_reached = False
+        open_limit = activity.goal_mode == GoalMode.OPEN_ENDED and not autonomous_goal and node.round_index >= self.max_open_nodes
         # An estimate is reviewed at a node boundary by the runner.  It is not
         # a hidden deadline; explicit activity timers remain authoritative.
-        horizon_done = bool(run.next_wake_at and now >= self._parse(run.next_wake_at) and self._horizon_mode(run) == "deadline")
         if activity.interrupt_requested:
-            self._move_to_settling(run, activity, SettlementReason.USER_INTERRUPT)
+            self._move_to_settling(run, activity, SettlementReason.USER_INTERRUPT, save=False)
+            self.store.save_plan(run, [activity], reviewed_node=node)
             return RuntimeAction(RuntimeActionType.SETTLE, run.run_id, activity.activity_id, reason=SettlementReason.USER_INTERRUPT)
         if execution_failed or abort_reason or not continue_activity or count_reached or open_limit or timer_done or horizon_done:
             reason = (
@@ -222,34 +251,42 @@ class WanderRuntimeController:
                 and not activity.interrupt_requested
                 and not execution_failed
                 and not abort_reason
+                and not horizon_done
             ):
-                self._add_switch_activity(run, switch_to)
-            self._move_to_settling(run, activity, reason)
+                successor = self._add_switch_activity(run, switch_to, switch_goal)
+            else:
+                successor = None
+            self._move_to_settling(run, activity, reason, save=False)
+            self.store.save_plan(run, [activity, *([successor] if successor else [])], reviewed_node=node)
             return RuntimeAction(RuntimeActionType.SETTLE, run.run_id, activity.activity_id, reason=reason)
         activity.transition_to(ActivityState.ACTIVE_WAIT)
         run.transition_to(RunState.ACTIVE_WAIT)
         # The executor chooses when the next real node may begin; no invented duration here.
         activity.next_node_at = self._iso(next_node_at) if next_node_at else None
-        self.store.save_activity(activity)
-        self.store.save_run(run)
+        self.store.save_plan(run, [activity], reviewed_node=node)
         return RuntimeAction(RuntimeActionType.WAIT, run.run_id, activity.activity_id)
 
-    def _add_switch_activity(self, run: WanderRun, switch_to: tuple[EventType, str]) -> None:
+    def _add_switch_activity(self, run: WanderRun, switch_to: tuple[EventType, str], switch_goal: Optional[dict] = None) -> WanderActivity:
         """判定换活动：现场创建一个 PLANNED 续作活动，settle 后由 settle_activity 激活。"""
         event_type, reason = switch_to
-        strategy = strategy_for(event_type)
         activities = [self._activity(item) for item in self.store.list_activities(run.run_id)]
         next_idx = max((a.order_index for a in activities), default=0) + 1
+        goal_mode, goal_value, completion = normalize_switch_goal(event_type, switch_goal or {}, autonomous=is_autonomous_run(run))
         activity = WanderActivity(
             activity_type=event_type.value,
             run_id=run.run_id,
             order_index=next_idx,
-            goal_mode=strategy.default_goal_mode,
-            goal_value=strategy.default_goal_value,
+            goal_mode=goal_mode,
+            goal_value=goal_value,
             reason=reason,
         )
         activity.transition_to(ActivityState.PLANNED)
-        self.store.save_activity(activity)
+        if is_autonomous_run(run):
+            autonomy = run.context_snapshot.setdefault("autonomy", {"version": 1, "activity_goal_policies": {}})
+            policies = autonomy.setdefault("activity_goal_policies", {})
+            policies[activity.activity_id] = {"completion": completion, "initial_goal_value": goal_value,
+                                              "extensions_total": 0, "reason": reason[:300]}
+        return activity
 
     @staticmethod
     def _horizon_mode(run: WanderRun) -> str:
@@ -355,6 +392,8 @@ class WanderRuntimeController:
         run: WanderRun,
         activity: WanderActivity,
         reason: Optional[SettlementReason] = None,
+        *,
+        save: bool = True,
     ) -> None:
         if activity.state != ActivityState.SETTLING:
             activity.transition_to(ActivityState.SETTLING)
@@ -362,8 +401,8 @@ class WanderRuntimeController:
             activity.settlement_reason = reason
         if run.state != RunState.SETTLING:
             run.transition_to(RunState.SETTLING)
-        self.store.save_activity(activity)
-        self.store.save_run(run)
+        if save:
+            self.store.save_plan(run, [activity])
 
     @staticmethod
     def _iso(value: datetime) -> str:

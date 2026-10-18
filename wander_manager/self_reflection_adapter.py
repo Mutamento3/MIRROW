@@ -1,6 +1,6 @@
 """Pure, auditable self-reflection generation for the Wander runtime.
 
-The adapter creates pending self-book evidence and records wishes, but it does
+The adapter records capability observations and wishes, but it does
 not mutate the real self book or the production wish database.
 """
 
@@ -113,13 +113,12 @@ _OUTPUT_INSTRUCTION = """仅输出 JSON 对象：
   "capabilities":[{"statement":"我能……","evidence":["可验证事实"],"confidence":0.0}],
   "wish_action":{"type":"none|create|reaffirm|retain_impossible|delete_impossible","wish_id":null,"title":"新愿望标题","reason":"这次具体依据或理由","basis":"支持这次动作的新增事实"},
   "comment_reply":{"wish_id":null,"reply_to_comment_id":null,"content":"对用户评论的回复"},
-  "self_observations":[{"title":"短标题","category":"习惯|倾向与偏好|认知与价值观|自我认知|能力与边界","statement":"第一人称稳定倾向，80字内","keywords":["关键词"],"evidence_node_ids":[],"evidence_summary":"证据摘要","confidence":0.0,"stability":"tentative"}],
   "share_candidate":{"should_share":false,"reason":"","summary":""}
 }
 能力必须来自可验证能力目录；每次最多一个 wish_action 和一个 comment_reply。
 先阅读许愿板快照：create 只用于现有愿望、已实现历史和删除记录均未覆盖的新具体愿望；reaffirm 必须使用快照里的稳定 wish_id，且只有新的具体依据才增加次数；不要输出 fulfilled。
 用户标记天方夜谭的愿望只能用 retain_impossible 或 delete_impossible，并使用稳定 wish_id。没有动作时使用 none。没有想回复的评论时将 comment_reply 设为 null；一旦回复，reply_to_comment_id 必须引用快照中同一愿望的真实用户留言。历史留言不会因已有 AI 留言而失效，请结合留言时间和已有直接回复时间自由判断是否需要补充。
-单次最多一个自我观察，无充分证据则返回空数组。share_candidate 只是候选，不会直接推送。"""
+本次负责能力自查与许愿，不生成自我书候选；自我书由每日交流聚合维护。share_candidate 只是分享候选，不会直接推送。"""
 
 
 def _as_bool(value: Any) -> bool:
@@ -242,20 +241,11 @@ class SelfReflectionAdapter:
             self._fail_node(node, error or status)
             return None
 
-        candidates = [
-            self._candidate_row(node.node_id, index, candidate)
-            for index, candidate in enumerate(decision.self_observations)
-        ]
-        candidate_ids = self.store.save_self_book_candidates(
-            run_id=run["run_id"],
-            activity_id=activity["activity_id"],
-            node_id=node.node_id,
-            decision_id=decision_id,
-            candidates=candidates,
-        )
+        # Historical observations remain readable in decision audits. New
+        # reflection does not create a second queue of long-term cognition.
         node.execution_status = NodeExecutionStatus.SUCCEEDED.value
         node.completion_signal = "self_reflection_generated"
-        node.source_summary = f"完成一次自省：{decision.overall_reflection[:80]}"
+        node.source_summary = "完成一次自省"
         decision_payload = asdict(decision)
         # ``wishes`` belonged to the pre-stable-ID contract.  Do not persist
         # even the dataclass compatibility field on newly generated nodes;
@@ -265,7 +255,7 @@ class SelfReflectionAdapter:
             **decision_payload,
             "decision_id": decision_id,
             "wish_contract_version": 2,
-            "self_book_candidate_ids": candidate_ids,
+            "self_book_candidate_ids": [],
             "wish_commit_status": "not_committed",
         }
         node.execution_error = ""
@@ -317,17 +307,15 @@ class SelfReflectionAdapter:
                 "[本次调用阶段]\nself_reflection_generation",
                 f"[当前时间]\n{now}",
                 f"[用户状态]\n{context.user_status or '未知'}",
-                f"[今日近期对话]\n{_safe_text(context.today_conversation or '暂无', 6000)}",
+                f"[今日近期对话]\n{_safe_text(context.today_conversation or '暂无', None)}",
                 f"[触发原因]\n{context.trigger_reason or run.get('trigger_reason') or '自主倾向'}",
-                f"[AI可验证能力目录]\n{_safe_text(context.capability_catalog or '暂无', 5000)}",
-                f"[大脑结构摘要]\n{_safe_text(context.brain_summary or '暂无', 5000)}",
+                f"[当前身体事实]\n{_safe_text(context.capability_catalog or '本次未取得身体事实。', None)}",
                 # The model and board UI consume the same complete wish/comment
                 # projection; never cut a wish or a comment in the middle.
                 f"[许愿板历史状态快照]\n{_safe_text(context.wish_context or '暂无', None)}",
-                f"[相关既有自我书]\n{_safe_text(context.existing_self_book or '暂无', 3000)}",
-                f"[相似待核验候选]\n{_safe_text(context.pending_candidates or '暂无', 2500)}",
+                f"[相关既有自我书]\n{_safe_text(context.existing_self_book or '暂无', None)}",
                 f"[活动身份]\nrun_id={run['run_id']}；activity_id={activity['activity_id']}",
-                "[写入边界]\n本次只生成候选；不会直接修改自我书，也不会提交愿望次数。",
+                "[写入边界]\n自省保留于运行审计；长期自我认识由日结维护，愿望变更由独立提交器执行。",
             )
         )
 

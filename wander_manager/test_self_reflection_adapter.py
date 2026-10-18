@@ -1,4 +1,4 @@
-"""Tests for pure self-reflection generation and pending self-book evidence."""
+"""Reflection audits remain separate from daily-maintained self cognition."""
 
 from __future__ import annotations
 
@@ -108,13 +108,13 @@ class SelfReflectionAdapterTests(unittest.TestCase):
             current_time="2026/08/18 20:00",
             user_status="用户离开中",
             trigger_reason="自主倾向",
-            capability_catalog="记忆检索、对话、新闻搜索",
-            brain_summary="MIRROW 是 AI 的身体。内网地址 192.168.10.8 不应进入审计。",
+            capability_catalog="记忆检索、对话、新闻搜索；地址 203.0.113.8 不应进入审计。",
+            brain_summary="旧生成散文不是当前身体能力的权威",
             wish_context="希望拥有更可靠的时间感",
             existing_self_book="我重视真实执行。",
         )
 
-    def test_generation_creates_pending_candidate_without_committing_wish(self):
+    def test_generation_keeps_audit_without_queuing_candidates_or_committing_wish(self):
         run, _, node, evidence_node = self._make_node()
 
         async def llm(**_kwargs):
@@ -168,15 +168,16 @@ class SelfReflectionAdapterTests(unittest.TestCase):
         self.assertNotIn("wishes", stored_node["source_payload"])
         self.assertEqual(2, stored_node["source_payload"]["wish_contract_version"])
         candidates = self.store.list_self_book_candidates(run_id=run.run_id)
-        self.assertEqual(1, len(candidates))
-        self.assertEqual("pending", candidates[0]["status"])
-        self.assertEqual(node.node_id, candidates[0]["node_id"])
+        self.assertEqual([], candidates)
+        self.assertEqual([], stored_node["source_payload"]["self_book_candidate_ids"])
+        self.assertEqual("完成一次自省", stored_node["source_summary"])
 
         audit = self.store.list_decisions(run.run_id, DecisionPhase.SELF_REFLECTION)[-1]
         self.assertEqual("self reasoning", audit["reasoning"])
         self.assertEqual(4, audit["cache_tokens"])
-        self.assertNotIn("192.168.10.8", audit["input_context"]["runtime"])
+        self.assertNotIn("203.0.113.8", audit["input_context"]["runtime"])
         self.assertIn("[REDACTED_IP]", audit["input_context"]["runtime"])
+        self.assertNotIn("旧生成散文", audit["input_context"]["runtime"])
 
         with self.assertRaises(ValueError):
             asyncio.run(

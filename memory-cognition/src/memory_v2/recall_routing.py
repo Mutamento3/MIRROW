@@ -8,7 +8,7 @@ reference date instead of inventing a clock or logical-day boundary here.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, timedelta
 
 from .recall import RecallQuery, RecallSortMode
@@ -183,23 +183,15 @@ def apply_recall_routing_hints(
     """Fill unset deterministic fields without weakening explicit caller filters."""
 
     caller_has_date_filter = bool(query.date_from or query.date_to)
-    return RecallQuery(
-        text=query.text,
-        variants=query.variants,
-        entity_terms=query.entity_terms,
-        subject_ids=query.subject_ids,
-        event_types=query.event_types,
-        source_kinds=query.source_kinds,
+    return replace(
+        query,
         date_from=(query.date_from if caller_has_date_filter else hints.date_from),
         date_to=(query.date_to if caller_has_date_filter else hints.date_to),
-        date_basis=query.date_basis,
         sort_mode=(
             query.sort_mode
             if query.sort_mode != "relevance"
             else hints.sort_mode
         ),
-        exclude_message_ids=query.exclude_message_ids,
-        exclude_active_dates=query.exclude_active_dates,
     )
 
 
