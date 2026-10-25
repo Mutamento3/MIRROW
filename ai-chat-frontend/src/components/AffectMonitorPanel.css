@@ -1,0 +1,17 @@
+.affect-page { padding: 18px; overflow-y: auto; }
+.affect-page .monitor-page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.affect-page h1, .affect-page h2 { margin-top: 0; }
+.affect-page .affect-tabs { display: flex; gap: 8px; margin: 14px 0; }
+.affect-page .affect-tabs button { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border-color, #ddd); background: var(--bg-secondary, #fafafa); color: inherit; }
+.affect-page .affect-tabs button.active { border-color: var(--accent-color, #927bc0); background: var(--accent-light, #eee8f8); }
+.affect-page .affect-page-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.affect-page .affect-primary-card { grid-column: 1 / -1; }
+.affect-page .affect-renderer, .affect-page .affect-reason { white-space: pre-wrap; overflow-wrap: anywhere; }
+.affect-page .affect-component-list, .affect-page .affect-checkin-list, .affect-page .affect-trace-list { display: grid; gap: 10px; }
+.affect-page .affect-component, .affect-page .affect-checkin, .affect-page .affect-trace-list > div { padding: 10px; border: 1px solid var(--border-color, #ddd); border-radius: 8px; overflow-wrap: anywhere; }
+.affect-page .affect-component-title { display: flex; justify-content: space-between; gap: 8px; }
+.affect-page small { display: block; margin-top: 4px; opacity: 0.7; }
+@media (max-width: 700px) {
+  .affect-page { padding: 12px; }
+  .affect-page .affect-page-grid { grid-template-columns: minmax(0, 1fr); }
+}

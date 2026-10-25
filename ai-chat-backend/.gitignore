@@ -1,0 +1,8 @@
+captures/
+.env
+*.log
+__pycache__/
+*.pyc
+.tmp/
+.venv/
+.venv-dml/

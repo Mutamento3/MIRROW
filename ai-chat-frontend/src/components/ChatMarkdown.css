@@ -1,0 +1,98 @@
+.message-bubble.message-markdown-bubble {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+.message-markdown-bubble > .message-text,
+.chat-markdown {
+  min-width: 0;
+  max-width: 100%;
+}
+.chat-markdown {
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.chat-markdown > :first-child { margin-top: 0; }
+.chat-markdown > :last-child { margin-bottom: 0; }
+.chat-markdown p { margin: .45em 0; white-space: pre-wrap; }
+.chat-markdown strong { font-weight: 700; }
+.chat-markdown :is(h1, h2, h3, h4, h5, h6) {
+  color: inherit;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: .65em 0 .3em;
+}
+.chat-markdown h1 { font-size: 1.12em; }
+.chat-markdown h2 { font-size: 1.06em; }
+.chat-markdown :is(ul, ol) { margin: .35em 0; padding-inline-start: 1.4em; }
+.chat-markdown li { padding-inline-start: .1em; white-space: normal; }
+.chat-markdown li + li { margin-top: .12em; }
+.chat-markdown li > p { margin: .25em 0; }
+.chat-markdown .contains-task-list { list-style: none; padding-inline-start: .15em; }
+.chat-markdown .task-list-item > input { margin-inline-end: .45em; accent-color: var(--primary-color, #8d6aae); }
+.chat-markdown blockquote {
+  margin: .4em 0;
+  padding-inline-start: .75em;
+  border-inline-start: 3px solid rgba(127, 127, 127, .4);
+  color: var(--text-secondary, inherit);
+}
+.chat-markdown a { color: inherit; text-decoration: underline; text-underline-offset: .16em; }
+.chat-markdown code,
+.message .message-bubble .message-text .chat-markdown code {
+  display: inline;
+  color: inherit;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: .9em;
+  background: rgba(127, 127, 127, .12);
+  border-radius: .3em;
+  padding: .1em .3em;
+  white-space: pre-wrap;
+  overflow: visible;
+  overflow-wrap: anywhere;
+}
+.chat-markdown pre,
+.message .message-bubble .message-text .chat-markdown pre {
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: .4em 0;
+  padding: .7em .8em;
+  border: 1px solid rgba(127, 127, 127, .2);
+  border-radius: .65em;
+  background: rgba(127, 127, 127, .08);
+  overflow-x: auto;
+  white-space: pre;
+  overflow-wrap: normal;
+  word-break: normal;
+  overscroll-behavior-x: contain;
+}
+.chat-markdown pre code,
+.message .message-bubble .message-text .chat-markdown pre code {
+  display: block;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  font-size: .88em;
+  max-width: none;
+  white-space: pre;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.chat-markdown-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+.chat-markdown table { border-collapse: collapse; min-width: 100%; width: max-content; font-size: .93em; }
+.chat-markdown :is(th, td) {
+  border: 1px solid rgba(127, 127, 127, .28);
+  padding: .35em .55em;
+  min-width: 3em;
+  max-width: 22em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.chat-markdown th { background: rgba(127, 127, 127, .08); font-weight: 600; }
+.chat-markdown hr { margin: .65em 0; border: 0; border-top: 1px solid rgba(127, 127, 127, .28); }
+.chat-markdown .footnotes { margin-top: .7em; font-size: .85em; }
+.chat-markdown .footnotes ol { padding-inline-start: 1.4em; }
+.chat-markdown :is(a, pre, .chat-markdown-scroll):focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }

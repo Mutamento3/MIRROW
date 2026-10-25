@@ -1,0 +1,12 @@
+.memory-boxes-panel { margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color); }
+.memory-boxes-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; }
+.memory-boxes-heading h4 { margin: 0; color: var(--text-primary); }
+.memory-boxes-heading span, .memory-boxes-empty { color: var(--text-secondary); font-size: 0.82rem; }
+.memory-box-card { margin-bottom: 0.6rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); overflow: hidden; }
+.memory-box-card > summary { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.65rem; padding: 0.75rem 0.85rem; cursor: pointer; color: var(--text-primary); line-height: 1.55; }
+.memory-box-card > summary small { grid-column: 2; color: var(--text-secondary); }
+.memory-box-time { color: var(--accent); font-size: 0.82rem; white-space: nowrap; }
+.memory-box-sources { padding: 0 0.85rem 0.8rem; }
+.memory-box-source { padding: 0.55rem 0; border-top: 1px solid var(--border-color); }
+.memory-box-source span { color: var(--text-secondary); font-size: 0.78rem; }
+.memory-box-source p { margin: 0.25rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; color: var(--text-primary); }

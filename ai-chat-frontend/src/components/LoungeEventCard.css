@@ -1,0 +1,45 @@
+.lounge-event-row { display:flex; justify-content:center; padding:3px 12px; width:100%; box-sizing:border-box; }
+.lounge-event-trigger { display:grid; grid-template-columns:1.35rem minmax(0,1fr); align-items:start; gap:.35rem; width:100%; max-width:100%; min-height:32px; padding:5px 8px; border:0; border-radius:5px; background:transparent; color:#8b7365; cursor:pointer; font:inherit; font-size:12px; line-height:1.5; text-align:left; }
+.lounge-event-icon { display:inline-grid; place-items:center; width:1.35rem; line-height:1.5; }
+.lounge-event-copy { min-width:0; word-break:normal; overflow-wrap:break-word; }
+.social-gift-event{width:100%;min-width:0}.social-gift-event>summary{list-style:none}.social-gift-event>summary::-webkit-details-marker{display:none}.social-gift-event>p{font-size:12px;line-height:1.7;color:var(--text-secondary,#8b7365);white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 8px 10px}
+.lounge-event-trigger:hover { color:#634b3e; text-decoration:underline; text-underline-offset:3px; }
+.lounge-event-trigger:focus-visible { outline:2px solid #bc8062; outline-offset:3px; }
+.lounge-event-dialog { box-sizing:border-box; width:min(680px,calc(100vw - 24px)); max-height:calc(100dvh - 32px); padding:0; border:1px solid #d9cabb; border-radius:20px; color:#473c35; background:#fffaf3; box-shadow:0 18px 60px #34281d40; }
+.lounge-event-dialog::backdrop { background:#241b1859; }
+.lounge-event-dialog header { position:sticky; top:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 20px; background:inherit; border-bottom:1px solid #e7dacc; z-index:1; }
+.lounge-event-dialog h2 { font-size:19px; margin:0; overflow-wrap:anywhere; }
+.lounge-event-dialog header button { flex:none; width:40px; height:40px; border:0; border-radius:12px; color:inherit; background:#eadfd2; font-size:26px; cursor:pointer; }
+.lounge-event-body { padding:8px 20px 24px; overflow-wrap:anywhere; }
+.lounge-event-body h3 { font-size:15px; margin-top:24px; }
+.lounge-event-status { font-size:13px; opacity:.7; }
+.lounge-event-summary,.lounge-event-turn p { white-space:pre-wrap; line-height:1.8; }
+.lounge-event-turn { border-top:1px solid #e7dacc; padding-top:14px; margin-top:14px; }
+.lounge-event-turn > strong { display:block; line-height:1.5; }
+.lounge-event-turn > small { display:block; margin-top:3px; opacity:.62; }
+.lounge-event-turn.rejected { padding-left:12px; border-left:3px solid #dac8b5; }
+.lounge-event-meta { margin:10px 0 18px; padding:12px 14px; border-radius:14px; background:#f5ecdf; }
+.lounge-event-meta span { font-size:12px; opacity:.7; }
+.lounge-event-meta p { margin:6px 0 0; line-height:1.7; }
+.lounge-event-tags { display:flex; flex-wrap:wrap; gap:6px; }
+.lounge-event-tags span,.lounge-event-verdict { display:inline-block; padding:2px 8px; border-radius:999px; background:#eee2d4; font-size:12px; color:#795f50; }
+.lounge-event-context { margin-top:24px; padding:10px 12px; border:1px solid #e7dacc; border-radius:12px; font-size:13px; }
+.lounge-event-context summary { cursor:pointer; color:#856f61; }
+.lounge-event-context p { white-space:pre-wrap; line-height:1.7; }
+.lounge-event-footer { display:flex; justify-content:flex-end; margin-top:18px; }
+.lounge-event-footer button { min-height:38px; padding:7px 14px; border:1px solid #cfb9a6; border-radius:12px; color:#674c3e; background:#f5e9dd; cursor:pointer; }
+.lounge-event-turn time { display:block; font-size:12px; opacity:.6; margin-top:4px; }
+@media (prefers-color-scheme:dark) {
+  .lounge-event-dialog { background:#302a26; color:#f2e7dc; border-color:#655446; }
+  .lounge-event-trigger { color:#cab3a2; }
+  .lounge-event-dialog header button { background:#514136; }
+  .lounge-event-meta,.lounge-event-tags span,.lounge-event-verdict,.lounge-event-footer button { background:#453a32; color:#eadbce; }
+  .lounge-event-context { border-color:#655446; }
+}
+@media (max-width:480px) {
+  .lounge-event-dialog { width:calc(100vw - 12px); max-height:calc(100dvh - 12px); border-radius:16px; }
+  .lounge-event-dialog header { padding:11px 14px; }
+  .lounge-event-dialog h2 { font-size:17px; }
+  .lounge-event-body { padding:6px 14px 18px; }
+  .lounge-event-body h3 { margin-top:19px; }
+}

@@ -1,0 +1,11 @@
+.msg-search-panel .msg-search-input { min-width: 0; width: 0; }
+.msg-search-panel .msg-search-types { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 10px 4px; }
+.msg-search-types button { border: 1px solid var(--border-color); border-radius: 14px; background: transparent; color: var(--text-secondary); padding: 5px 10px; font-size: 12px; cursor: pointer; }
+.msg-search-types button[aria-pressed="true"] { color: var(--text-primary); background: var(--bg-secondary, #efe9dd); border-color: #b99b60; }
+.msg-search-types button:focus-visible { outline: 2px solid #b99b60; outline-offset: 2px; }
+.msg-search-card-filter { display: flex; align-items: center; gap: 10px; padding: 6px 12px; font-size: 12px; color: var(--text-secondary); }
+.msg-search-card-filter select { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary); font-size: 13px; }
+.msg-search-item-types { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.msg-search-item-types span { color: var(--text-secondary); background: var(--bg-secondary); border-radius: 4px; padding: 1px 4px; font-size: 11px; }
+.msg-search-panel .msg-search-item-meta { flex-wrap: wrap; }
+.msg-search-panel .msg-search-item-snippet { white-space: normal; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }

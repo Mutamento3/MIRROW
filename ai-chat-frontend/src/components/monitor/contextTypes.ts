@@ -1,0 +1,10 @@
+export type SectionInfo = {chars:number;tokens:number;text?:string;status?:string;condition?:string;count?:number};
+export type RecipeCall = {scenario:string;recipe:string;timestamp:string;sections:Record<string,SectionInfo>;total_chars:number;total_tokens:number;messages_count?:number;via_builder?:boolean;msg_order?:{idx:number;role:string;section:string;preview:string;chars:number}[]};
+export type RecipeEntry = {key:string;name:string;consumer:string;pipeline:string;sections:{name:string;ingredient:string;group:string;condition?:string}[]};
+export type ContextMessage = {role:string;content:unknown;section?:string;layer?:string;reasoning_content?:string;[key:string]:unknown};
+export type Placement = {message_index:number;start:number;end:number|null};
+export type InspectionSection = SectionInfo & {ingredient:string;name:string;recipe_order:number;group:string;condition_value:boolean|null;stable_candidate:boolean;source:string;explanation:string;reason:string;diagnostics:Record<string,unknown>;placements:Placement[]};
+export type ProviderInspection = {request_id:string;timestamp:string;model:string;provider:string;status:string;body_available:boolean;messages:ContextMessage[];message_count:number;association:string;builder_message_map:{builder_index:number;provider_index:number|null;match:string}[]};
+export type Inspection = {call_id:string;recipe:string;scenario:string;timestamp:string;dynamic_last:boolean;body_available:boolean;body_note:string;messages:ContextMessage[];sections:InspectionSection[];providers:ProviderInspection[]};
+export type InspectionSummary = Pick<Inspection,'call_id'|'recipe'|'scenario'|'timestamp'> & {provider_count:number};
+export const statusLabel = (status?:string) => ({ok:'已组装',dynamic:'动态段',interleaved:'穿插消息',peeked:'尾部提醒',tail:'待调用方处理',gated:'门控跳过',empty:'本轮返回空',error:'构建异常',disabled:'已禁用',shadow_preview:'仅影子预览'}[status || ''] || '未采集');

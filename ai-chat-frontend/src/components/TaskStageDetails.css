@@ -1,0 +1,6 @@
+.task-stage-details { margin: 4px 0 6px 24px; font-size: 11px; }
+.task-stage-details summary { cursor: pointer; opacity: .85; }
+.task-stage-details ul { list-style: none; padding: 0; margin: 6px 0 0; max-height: 180px; overflow-y: auto; }
+.task-stage-details li { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; }
+.task-stage-details li[data-status="running"] { color: #ffd700; }
+.task-stage-details li[data-status="error"], .task-stage-details li[data-status="interrupted"] { color: #ef5350; }

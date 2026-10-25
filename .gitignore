@@ -1,86 +1,36 @@
-# ══════════════════════════════════════════════════════════
-# 本仓库不包含任何用户数据。以下规则分两类：
-# ① 使用者本地运行产物  ② 防误拷贝的隐私兜底（与私有部署的数据目录同名，
-#    即使误复制进来也不会被 git 跟踪）
-# ══════════════════════════════════════════════════════════
-
-# ── Python ──
-__pycache__/
-*.pyc
-*.pyo
-.venv/
-venv/
-*.egg-info/
-
-# ── 环境与密钥（任何形态的密钥文件一律不进库）──
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-*_cookies.json
-credentials*.json
-
-# ── 运行时产物 ──
-logs/
-*.log
-*.jsonl
-*.db
-*.sqlite3
-*.db-journal
-data/
-captures/
-static/
-model_cache/
-settings.json
-settings.local.json
-*.tmp
-.tmp/
-temp/
-temp_*/
-
-# ── 隐私兜底：私有部署的数据目录名（防误拷贝）──
-sessions/
-sessions_backup*/
-conversations/
-events/
-buckets/
-memory/
-Memory_*/
-# Windows ignore-case matching also catches the public memory_v2 source package.
-# Admit source only; runtime data and caches remain excluded.
-!/memory-cognition/src/memory_v2/
-/memory-cognition/src/memory_v2/*
-!/memory-cognition/src/memory_v2/*.py
-world_book/entries/
-scp_encyclopedia/entries/
-backups/
-数据备份*/
-voice_manager/output/
-wander_data/
-
-# ── 媒体/大文件（本仓库不应出现，出现即异常）──
-*.wav
-*.mp3
-*.mp4
-*.apk
-*.zip
-*.pth
-*.onnx
-
-# ── IDE / OS ──
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# ── 残留目录（克隆中断/本地杂项，不应提交）──
-AionsHome/
-
-# ── 本地宿主 / 前端 ──
-local-data/
-*.db-wal
-*.db-shm
-node_modules/
-dist/
+# Publish only reviewed source; keep generated and private runtime data local.
+**/node_modules/
+**/dist/
+**/build/
+**/.venv/
+**/venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.gradle/
+**/.env
+**/.env.*
+!**/.env.example
+**/local.properties
+**/*.db
+**/*.db-*
+**/*.sqlite
+**/*.sqlite3
+**/*.jsonl
+**/*.log
+**/*.jks
+**/*.keystore
+**/*.pem
+**/*.key
+**/*.apk
+**/*.aab
+**/data/
+**/logs/
+**/backups/
+**/captures/
+**/sessions/
+**/events/
+**/voice_setup/
+**/models/
+**/model_cache/
+**/local_settings.json
+**/settings.json

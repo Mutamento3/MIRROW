@@ -1,0 +1,4 @@
+vendor/node_modules/
+vendor/dist/
+*.sqlite*
+*.db*

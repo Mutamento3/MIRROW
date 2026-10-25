@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mirrow.xhssignals" android:versionCode="1" android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34" />
+    <permission android:name="com.mirrow.xhssignals.permission.ACCESS_SIGNALS"
+        android:protectionLevel="signature" />
+    <queries><package android:name="com.mirrow.xhstexthelper" /></queries>
+    <application android:label="小红书通知提醒"
+        android:allowBackup="false" android:hasCode="true">
+        <service android:name="com.mirrow.xhssignals.XhsNotificationListener"
+            android:label="小红书通知提醒" android:exported="true"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+        <provider android:name="com.mirrow.xhssignals.SignalProvider"
+            android:authorities="com.mirrow.xhssignals.signals"
+            android:exported="true"
+            android:permission="com.mirrow.xhssignals.permission.ACCESS_SIGNALS" />
+    </application>
+</manifest>

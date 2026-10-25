@@ -1,0 +1,88 @@
+.commerce-settings {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.commerce-settings-intro {
+  margin-top: -5px;
+}
+
+.commerce-settings-card {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+}
+
+.commerce-settings-card-title {
+  margin-bottom: 5px;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.commerce-settings-card .help-text {
+  margin: 4px 0 10px;
+}
+
+.commerce-settings-form,
+.commerce-limit-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.commerce-settings-form label,
+.commerce-limit-fields label {
+  display: grid;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+.commerce-settings-form input,
+.commerce-limit-fields input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.commerce-settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.commerce-limit-list {
+  display: grid;
+  gap: 4px;
+}
+
+.commerce-limit-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  padding: 11px 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.commerce-limit-name {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.commerce-limit-save {
+  white-space: nowrap;
+}
+
+.commerce-settings-loading {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.commerce-settings-error {
+  margin-top: 10px;
+  color: #a33;
+}

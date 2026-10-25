@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 暖镜流体的自适应图标背景：与原图外缘的近黑暖色衔接。 -->
+    <color name="ic_launcher_background">#1A1015</color>
+    <color name="splash_background">#120B11</color>
+</resources>

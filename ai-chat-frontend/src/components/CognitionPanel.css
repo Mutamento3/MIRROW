@@ -1,0 +1,26 @@
+.cognition-overlay{position:fixed;inset:0;z-index:2000;background:rgba(16,17,25,.75);display:flex;justify-content:center;padding:20px;overflow:auto;color:#eee}
+.cognition-panel{background:#222330;width:min(1060px,100%);padding:24px;border-radius:14px;overflow:auto;box-sizing:border-box}
+.cognition-panel header,.cognition-panel nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.cognition-panel nav{justify-content:flex-start;margin-bottom:18px}
+.cognition-panel button{padding:8px 12px;border:1px solid #777;background:#393b50;color:#fff;border-radius:6px;cursor:pointer}
+.cognition-panel button:disabled{opacity:.5;cursor:default}
+.cognition-panel button[aria-pressed=true]{background:#55537d;border-color:#b8b3f5}
+.cognition-panel label{display:block;margin:12px 0}
+.cognition-panel input:not([type=checkbox]),.cognition-panel select,.cognition-panel textarea{display:block;width:100%;box-sizing:border-box;padding:9px;background:#171923;color:#eee;border:1px solid #74758a;border-radius:5px;margin-top:5px;font:inherit}
+.cognition-panel textarea{resize:vertical}.cognition-panel pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.6}
+.cognition-panel small{display:block;color:#c2c1d5;margin:5px 0}.cognition-grid{display:grid;grid-template-columns:230px 1fr;gap:20px}
+.cognition-grid aside{display:flex;flex-direction:column;gap:8px;align-items:stretch}.cognition-grid aside button{text-align:left}
+.cognition-panel article,.cognition-diff>div{padding:12px;border:1px solid #55566b;border-radius:7px;margin:12px 0}
+.cognition-diff{display:grid;grid-template-columns:1fr 1fr;gap:16px}.cognition-message{background:#36394b;padding:12px;overflow-wrap:anywhere}
+.cognition-page{position:fixed;inset:0;z-index:1000;overflow:auto;background:var(--bg-secondary,#222330);color:var(--text-primary,#eee);padding:24px;box-sizing:border-box}
+.cognition-page>.cognition-panel{margin:auto;width:min(1200px,100%);min-height:100%;background:var(--bg-secondary,#222330);color:var(--text-primary,#eee)}
+.cognition-page .cognition-panel input:not([type=checkbox]),.cognition-page .cognition-panel select,.cognition-page .cognition-panel textarea{background:var(--bg-primary,#171923);color:var(--text-primary,#eee)}
+.cognition-page .cognition-panel small{color:var(--text-secondary,#c2c1d5)}
+.cognition-page .cognition-panel h2{margin:0}.cognition-page .cognition-panel header{margin-bottom:20px}
+.cognition-page nav[aria-label="认知书籍"]{border-bottom:1px solid #777;padding-bottom:14px;gap:12px}
+.cognition-page nav[aria-label="认知书籍"] button{font-size:1.1rem;min-width:100px}
+.cognition-page .cognition-grid>section,.cognition-page .cognition-grid>aside{min-width:0}
+.cognition-legacy-book{position:relative;min-height:400px}.cognition-legacy-book .wb-container,.cognition-legacy-book .scp-container{padding:0}
+.cognition-feedback .ledger-modal{width:100%;max-height:none;box-sizing:border-box;box-shadow:none}
+@media(max-width:700px){.cognition-page{padding:0}.cognition-page>.cognition-panel{padding:14px}.cognition-page nav[aria-label="认知书籍"]{flex-wrap:nowrap;gap:6px;overflow-x:auto}.cognition-page nav[aria-label="认知书籍"] button{min-width:70px;padding:9px 8px}.cognition-page .cognition-grid aside{max-height:240px}}
+@media(max-width:700px){.cognition-overlay{padding:0}.cognition-panel{border-radius:0;padding:15px}.cognition-grid,.cognition-diff{grid-template-columns:1fr}.cognition-grid aside{max-height:180px;overflow:auto}}

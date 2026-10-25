@@ -1,0 +1,53 @@
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+httpx>=0.25.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+python-multipart>=0.0.9
+python-frontmatter>=1.1.0
+openai>=1.0.0
+psutil>=5.9.0
+pywin32>=306; sys_platform == "win32"
+PyYAML>=6.0
+requests>=2.32.3
+beautifulsoup4>=4.12.3
+
+# 新增摘要索引依赖
+sentence-transformers>=2.2.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+faiss-cpu>=1.7.0
+aiofiles>=23.0.0
+aiosqlite>=0.19.0
+mcp>=1.12.0,<2
+cryptography>=49.0.0,<50
+PyJWT[crypto]>=2.9.0,<3
+apscheduler>=3.10.0
+jieba>=0.42.1
+pytz>=2023.3
+
+# 行为调度器依赖
+playwright>=1.40.0
+mss>=9.0.0
+Pillow>=10.0.0
+websockets>=15.0
+bleak>=0.21.0
+
+# 语音模块依赖
+faster-whisper>=1.0.0
+sounddevice>=0.5.2,<0.6  # 电脑环境麦克风；仅选中电脑来源时打开输入流
+sherpa-onnx==1.13.8  # 本地 CAM++ 声纹；单线程、仅按新鲜片段运行
+
+# 网易云音乐
+pyncm>=1.0.0
+qrcode[pil]>=8.0,<9
+winrt-Windows.Media.Control>=3.2,<4; sys_platform == "win32"
+winrt-Windows.Foundation>=3.2,<4; sys_platform == "win32"
+winrt-Windows.Foundation.Collections>=3.2,<4; sys_platform == "win32"
+winrt-Windows.Media>=3.2,<4; sys_platform == "win32"
+edge-tts>=7.3.0
+pygame>=2.5.0
+soundfile>=0.12.1
+scipy>=1.10.0
+librosa>=0.10.0
+matplotlib>=3.7.0

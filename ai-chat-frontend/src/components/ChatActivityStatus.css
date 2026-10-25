@@ -1,0 +1,15 @@
+.chat-activity-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 3px 16px;
+  color: var(--text-secondary, #716b62);
+  font-size: 12px;
+  line-height: 20px;
+  flex-shrink: 0;
+}
+.chat-activity-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-activity-dot { width: 5px; height: 5px; flex: 0 0 5px; border-radius: 50%; background: currentColor; }
+.chat-activity-dot.background { opacity: .55; }
+@media (max-width: 768px) { .chat-activity-status { padding: 2px 12px; line-height: 18px; } }

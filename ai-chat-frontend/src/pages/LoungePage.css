@@ -1,0 +1,12 @@
+.app[data-view=lounge]>.header{display:none}
+.lounge-host{position:fixed;inset:0;z-index:1000;height:100dvh;box-sizing:border-box;display:flex;flex-direction:column;background:#fff8ef;color:#594235;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.lounge-host[data-theme=dark]{background:#2b2220;color:#f7e8d9}
+.lounge-host>header{display:flex;align-items:center;gap:14px;padding:8px 12px;flex-shrink:0;border-bottom:1px solid #bb997955}
+.lounge-tabs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.lounge-tabs button{font-size:.9rem}
+.lounge-tabs button.active{background:#ad7895;color:#fff;border-color:#ad7895}
+@media(max-width:600px){.lounge-host>header{gap:6px;flex-wrap:wrap}.lounge-host>header>span{font-size:.9rem}.lounge-tabs{width:100%;margin-left:0}.lounge-tabs button{flex:1}}
+.lounge-host button{min-height:44px;padding:8px 12px;border:1px solid #bb997955;border-radius:14px;background:transparent;color:inherit;font:inherit}
+.lounge-host iframe{width:100%;min-height:0;flex:1;border:0}
+.lounge-visit-card{display:block;max-width:100%;text-align:left;border:1px solid #bb997977;background:#bb997911;color:inherit;border-radius:18px;padding:14px;margin:10px 0;cursor:pointer;overflow-wrap:anywhere;min-height:44px}
+.lounge-visit-card small{display:block;margin-top:6px;opacity:.75}

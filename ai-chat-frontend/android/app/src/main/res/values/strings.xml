@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MIRROW</string>
+    <string name="title_activity_main">MIRROW</string>
+    <string name="package_name">com.mirrow.app</string>
+    <string name="custom_url_scheme">com.mirrow.app</string>
+    <string name="a11y_service_desc">开启后 MIRROW 可在你不在电脑前时截取手机屏幕，供 AI 感知你在做什么。</string>
+</resources>

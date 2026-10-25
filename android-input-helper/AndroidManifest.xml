@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mirrow.xhstexthelper" android:versionCode="2" android:versionName="2.0">
+    <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34" />
+    <uses-permission android:name="com.mirrow.xhssignals.permission.ACCESS_SIGNALS" />
+    <queries><package android:name="com.mirrow.xhssignals" /></queries>
+    <application android:label="MIRROW XHS Text Helper"
+        android:debuggable="true" android:allowBackup="false" android:hasCode="true" />
+    <instrumentation android:name="com.mirrow.xhstexthelper.TextInstrumentation"
+        android:targetPackage="com.mirrow.xhstexthelper" />
+</manifest>

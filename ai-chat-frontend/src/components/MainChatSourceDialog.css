@@ -1,0 +1,55 @@
+.main-source-dialog {
+  width: min(520px, calc(100vw - 28px));
+  max-width: calc(100vw - 28px);
+  margin: auto;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  box-sizing: border-box;
+  padding: 0;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 20px 70px #0005;
+}
+.main-source-dialog::backdrop { background: #0007; }
+.main-source-dialog-content { padding: 22px; }
+.main-source-dialog header, .main-source-dialog footer { display: flex; align-items: center; gap: 12px; }
+.main-source-dialog header { justify-content: space-between; }
+.main-source-dialog h3 { font-size: 17px; margin: 0; }
+.main-source-dialog p { font-size: 12px; line-height: 1.7; color: var(--text-secondary); }
+.main-source-dialog button {
+  padding: 9px 13px;
+  min-height: 38px;
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.main-source-dialog button:disabled { opacity: .5; cursor: default; }
+.main-source-dialog fieldset { padding: 0; margin: 18px 0; border: 0; min-width: 0; }
+.main-source-dialog legend { font-size: 12px; color: var(--text-secondary); }
+.main-source-dialog .main-source-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  margin: 10px 0;
+  border: 1px solid var(--border-color);
+  border-radius: 11px;
+  cursor: pointer;
+}
+.main-source-option.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.main-source-option:has(input:disabled) { opacity: .5; cursor: default; }
+.main-source-option input { accent-color: var(--accent); flex-shrink: 0; margin-top: 3px; }
+.main-source-option > span { min-width: 0; font-size: 12px; line-height: 1.6; }
+.main-source-option strong { display: block; font-size: 13px; }
+.main-source-option small { color: var(--accent); font-size: 10px; margin-left: 8px; }
+.main-source-model { display: block; color: var(--text-secondary); overflow-wrap: anywhere; margin-top: 5px; }
+.main-source-dialog footer { justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+.main-source-dialog .main-source-confirm { background: var(--accent); color: white; border-color: var(--accent); }
+.main-source-dialog .main-source-error { color: #c95858; }
+.main-source-dialog :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.main-model-current-source { font-size: 12px; line-height: 1.6; padding: 10px 0; color: var(--text-secondary); }
+.main-model-current-source strong { color: var(--text-primary); }

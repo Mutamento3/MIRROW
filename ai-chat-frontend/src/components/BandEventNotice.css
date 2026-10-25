@@ -1,0 +1,6 @@
+.band-event-notice { margin: 3px 0; color: #8a7464; font-size: 11px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.band-event-notice > summary { cursor: pointer; overflow-wrap: anywhere; }
+.band-event-detail { margin-top: 6px; padding: 10px 12px; border-left: 2px solid #dcc5ac; background: #fff8ed; color: #665346; border-radius: 6px; }
+.band-event-detail p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 6px 0; }
+.band-notification-row { align-self: center; width: min(100%, 680px); max-width: 100%; min-width: 0; flex-shrink: 0; box-sizing: border-box; padding: 1px 12px; }
+.band-notification-row .band-event-notice { border-left: 2px solid #decbb8; padding-left: 8px; font-size: 11px; }

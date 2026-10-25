@@ -1,0 +1,11 @@
+.body-knowledge-container { min-width: 0; padding: 16px; }
+.body-knowledge-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.body-knowledge { line-height: 1.75; overflow-wrap: anywhere; }
+.body-knowledge h3 { margin: 18px 0 6px; font-size: 1em; }
+.body-knowledge p { margin: 8px 0; }
+.body-knowledge-note { opacity: .72; font-size: .9em; }
+.body-knowledge details { padding: 10px 0; border-bottom: 1px solid var(--border-color, #d9d4df); }
+.body-knowledge summary { cursor: pointer; }
+.body-knowledge summary:focus-visible { outline: 2px solid var(--accent-color, #9c7bb5); outline-offset: 4px; }
+.body-knowledge-archive { margin-top: 20px; }
+.body-knowledge-prose { white-space: pre-wrap; }

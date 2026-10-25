@@ -1,0 +1,56 @@
+"""
+组间引导词注册表 — 所有 Recipe 信息段的"神经元"引导文案单源真相。
+
+每个 ingredient（RecipeSection 段）可配置一句引导词，Builder 渲染该段时自动前置。
+引导词的作用是让 AI 收到每段信息时都知道"这是什么、什么时候的、我了解多深"，
+像神经元一样简单可靠、每次稳定出现。文案只中肯描述现象（时间定位 + 内容性质 +
+记忆清晰度梯度：昨天清晰、前天大概、间隙模糊），不包含行动、态度或措辞决策。
+
+零项目依赖（仅 stdlib），builder / ingredients / context_scheduler 三处均可安全 import。
+
+用法：
+    from context_builder.guides import guide_for, SELF_GUIDED
+    guide = guide_for("yesterday", {"yesterday_date": "2026-08-17", "yesterday_conversation": True})
+"""
+from typing import Dict, Union
+GUIDES: Dict[str, Union[str, dict]] = {'yesterday': {'conversation': '以下为 {date} 保存的对话片段，记录当时的表达，不自动代表当前状态。', 'compact': '以下为最近一个活跃日（{date}）的事实时间线、连续场景与相关原话节选。', 'diary_fallback': '以下为 {date} 的日记摘要材料；本轮未取得对应对话原文。'}, 'day_before_diary': '以下是更早一个活跃日（{date}）的日记摘要材料。', 'gap_diaries': '以下是跨日间隙中取得的日记材料。', 'referenced_diary': '以下是人类伙伴提起的 {date} 日记摘要。', 'memories': '此刻想起的你与人类伙伴的过往；可能相关、未确认同一次的记录另列：', 'self_memories': '你自己的经历与选择：', 'activity_summary': '以下是当前取得的人类伙伴活动概况；材料只覆盖其记录时间与来源范围：', 'recent_inner_wander': '以下是最近几次漫想留在心中的感受余韵，记录当时的经历与感想；有些尚未分享。'}
+SELF_GUIDED = frozenset({'memories'})
+_DATE_KEYS = {'yesterday': 'yesterday_date', 'day_before_diary': 'day_before_date', 'referenced_diary': 'referenced_diary_date'}
+
+def _fmt_cn_date(date_str: str) -> str:
+    """"2026-08-17" → "2026年8月17日"；非 YYYY-MM-DD 原样返回。"""
+    if not date_str:
+        return ''
+    parts = date_str.split('-')
+    if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit() and parts[2].isdigit():
+        return f'{int(parts[0])}年{int(parts[1])}月{int(parts[2])}日'
+    return date_str
+
+def guide_for(ingredient: str, kwargs: dict) -> str:
+    """渲染 ingredient 的引导词；无配置返回 ""。
+
+    规则：
+    - yesterday 按 kwargs["yesterday_conversation"] 选对话版/日记回退版
+    - 日期占位 {date} 从 kwargs 取；缺失时优雅降级（丢括号；referenced 回退"那天"）
+    """
+    spec = GUIDES.get(ingredient)
+    if not spec:
+        return ''
+    if isinstance(spec, dict):
+        if ingredient == 'yesterday':
+            if kwargs.get('yesterday_compact'):
+                spec = spec['compact']
+            else:
+                spec = spec['conversation'] if kwargs.get('yesterday_conversation') else spec['diary_fallback']
+        else:
+            return ''
+    date_key = _DATE_KEYS.get(ingredient, '')
+    date = _fmt_cn_date(kwargs.get(date_key, '')) if date_key else ''
+    if '{date}' not in spec:
+        return spec
+    if not date:
+        if ingredient == 'referenced_diary':
+            date = '那天'
+        else:
+            return spec.replace('（{date}）', '').replace('{date}', '')
+    return spec.replace('{date}', date)

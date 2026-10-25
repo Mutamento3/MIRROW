@@ -1,0 +1,9 @@
+# Optional improvements; the main runtime has explicit fallback/unavailable states.
+ImageHash>=4.3.1
+rapidfuzz>=3.0.0
+python-dateutil>=2.8.2
+chinesecalendar>=1.9.0
+opencv-python>=4.8.0
+winotify>=1.1.0; sys_platform == "win32"
+# Only for manually enabling the embedded ComputerTool, not registered by default.
+pyautogui>=0.9.54

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MIRROW</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- 错误捕获：JS加载失败时显示具体报错 -->
+    <div id="fatal-error" style="display:none;padding:20px;color:red;background:#fff;font-size:14px;white-space:pre-wrap;word-break:break-all;"></div>
+    <script>
+      window.onerror = function(msg, url, line, col, error) {
+        var el = document.getElementById('fatal-error');
+        el.style.display = 'block';
+        el.textContent = 'JS Error: ' + msg + '\\nFile: ' + url + '\\nLine: ' + line + ':' + col + '\\n' + (error ? error.stack : '');
+        document.getElementById('root').style.display = 'none';
+      };
+      window.addEventListener('unhandledrejection', function(e) {
+        var el = document.getElementById('fatal-error');
+        el.style.display = 'block';
+        el.textContent = 'Promise Error: ' + (e.reason ? (e.reason.message || e.reason) : '未知');
+        document.getElementById('root').style.display = 'none';
+      });
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

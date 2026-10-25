@@ -1,0 +1,18 @@
+.cognition-profile{max-width:860px;margin:0 auto;padding:8px 0 24px}
+.profile-header{display:flex;align-items:start;justify-content:space-between;gap:16px}
+.profile-header h2{margin:0 0 8px}.profile-header p,.profile-explanation,.profile-meta{color:var(--text-secondary);font-size:.85rem;line-height:1.7}
+.profile-status{padding:12px 14px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-secondary)}
+.profile-status-stale,.profile-status-unavailable{border-color:var(--accent)}
+.profile-selectors{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin:20px 0}
+.reading-page .profile-selectors nav{display:flex;gap:6px;border:0;margin:0;overflow:auto}
+.reading-page .profile-selectors button{border:1px solid var(--border-color);border-radius:16px;padding:7px 14px}
+.reading-page .profile-selectors button[aria-pressed=true]{color:var(--accent);border-color:var(--accent);background:var(--bg-secondary)}
+.profile-identity{font-size:.9rem;color:var(--text-secondary)}
+.profile-period h3{font-size:1rem;margin:24px 0 12px}
+.profile-point{border-bottom:1px solid var(--border-color);padding:0 0 16px;margin:0 0 16px}
+.profile-point>p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9;margin:0 0 10px}
+.profile-point small{display:block;color:var(--text-secondary);font-size:.78rem;line-height:1.6}
+.profile-point details{margin-top:10px;font-size:.85rem}.profile-point summary{cursor:pointer;color:var(--text-secondary)}
+.profile-point ul{list-style:none;padding:0;margin:10px 0}.profile-point li{margin:10px 0}
+.profile-empty{color:var(--text-secondary);padding:24px 0;line-height:1.7}
+@media(max-width:700px){.profile-header h2{font-size:1.2rem}.profile-selectors{margin:14px 0}.cognition-profile{padding:0 0 24px}.profile-point>p{font-size:1rem}}

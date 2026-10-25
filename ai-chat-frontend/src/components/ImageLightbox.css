@@ -1,0 +1,198 @@
+.image-lightbox-close {
+  position: absolute;
+  z-index: 3;
+  top: max(12px, env(safe-area-inset-top));
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.image-lightbox-toolbar {
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+
+.image-lightbox-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.image-lightbox-download, .image-lightbox-locate {
+  min-width: 160px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.image-lightbox-download:disabled { opacity: 0.65; cursor: wait; }
+.image-lightbox-error { color: #ffb4b4; font-size: 13px; text-align: center; }
+
+.image-lightbox-category-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 13px;
+}
+
+.image-lightbox-category {
+  display: flex;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.image-lightbox-category button {
+  min-width: 60px;
+  min-height: 32px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.68);
+  cursor: pointer;
+}
+
+.image-lightbox-category button.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-weight: 600;
+}
+
+.image-lightbox-category button.active.night { background: rgba(173, 102, 134, 0.5); }
+.image-lightbox-category button:disabled { opacity: 0.58; cursor: wait; }
+
+/* Size the image from the remaining viewport, never from a fixed subtraction.
+   The action row is not shrinkable; optional metadata scrolls separately. */
+div.image-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  justify-items: center;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  background: #18131bee;
+  color: #f5ebe8;
+  text-align: left;
+}
+.image-lightbox-overlay .image-lightbox-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  font-size: 14px;
+  color: #e0cfd7;
+}
+.image-lightbox-overlay .image-lightbox-close {
+  position: static;
+  flex: 0 0 44px;
+  background: #ffffff16;
+}
+.image-lightbox-overlay .image-lightbox-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: pan-y;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.image-lightbox-overlay .image-lightbox-img {
+  pointer-events: auto;
+  cursor: default;
+  border-radius: 8px;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.image-lightbox-overlay .image-lightbox-toolbar {
+  width: min(720px, 100%);
+  min-width: 0;
+  min-height: 0;
+  gap: 10px;
+}
+.image-lightbox-overlay .image-lightbox-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  min-width: 0;
+  flex: 0 0 auto;
+  gap: 10px;
+}
+.image-lightbox-overlay :is(.image-lightbox-download, .image-lightbox-locate) {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font: 600 14px/1.5 "Microsoft YaHei", system-ui, sans-serif;
+}
+.image-lightbox-overlay .image-lightbox-download {
+  background: #edb0bd;
+  color: #2a202b;
+  border-color: #edb0bd;
+}
+.image-lightbox-overlay .image-lightbox-details {
+  flex: 0 1 auto;
+  width: 100%;
+  max-height: min(150px, 22dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.image-lightbox-details:empty { display: none; }
+.image-lightbox-overlay .image-lightbox-category-wrap {
+  flex-wrap: wrap;
+  color: #e0cfd7;
+}
+.image-lightbox-overlay .image-lightbox-category button { color: #e0cfd7; min-height: 40px; }
+.image-lightbox-counter { font-size:14px; font-variant-numeric:tabular-nums; }
+.image-lightbox-nav { position:absolute; z-index:1; top:50%; transform:translateY(-50%); width:44px; height:52px; border:0; border-radius:8px; color:#fff; background:#ffffff29; font-size:36px; line-height:1; cursor:pointer; pointer-events:auto; }
+.image-lightbox-nav.previous { left:0; }
+.image-lightbox-nav.next { right:0; }
+.image-lightbox-overlay .image-lightbox-error { display: block; margin-top: 6px; overflow-wrap: anywhere; line-height: 1.6; }
+.image-lightbox-overlay button:focus-visible { outline: 2px solid #edb0bd; outline-offset: 2px; }
+@media (max-height: 460px) {
+  div.image-lightbox-overlay { gap: 6px; }
+  .image-lightbox-overlay .image-lightbox-details { max-height: 64px; }
+}

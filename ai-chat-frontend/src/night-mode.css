@@ -1,0 +1,143 @@
+/* One display palette for desktop, mobile, and night-aware dialogs.
+   This stylesheet never changes the server's night-mode capability/state. */
+.night-mode, .app.night-mode {
+  --night-bg: #211a22;
+  --night-surface: #2c2430;
+  --night-raised: #382d3b;
+  --night-ink: #f5ebe8;
+  --night-muted: #cdb9c1;
+  --night-dim: #baa2ad;
+  --night-line: #655160;
+  --night-accent: #edb0bd;
+  --night-action: #98435b;
+  --bg-primary: var(--night-bg);
+  --bg-secondary: var(--night-surface);
+  --bg-sidebar: #29202c;
+  --text-primary: var(--night-ink);
+  --text-secondary: var(--night-muted);
+  --border-color: var(--night-line);
+  --accent: var(--night-accent);
+  --accent-hover: #f5c5ce;
+  --accent-color: var(--night-accent);
+  --accent-light: #47303f;
+  --user-bg: #503043;
+  --assistant-bg: #302632;
+  --shadow: 0 8px 28px #0004;
+  /* Legacy heading/code tokens must follow the app, not index.css's black. */
+  --text: var(--night-muted);
+  --text-h: var(--night-ink);
+  --bg: var(--night-bg);
+  --border: var(--night-line);
+  --code-bg: #382d3b;
+  --accent-bg: #edb0bd18;
+  --accent-border: #edb0bd65;
+  /* Mobile glass, bubbles and text reference the same authority. */
+  --warm-bg: var(--night-bg);
+  --warm-surface: #2c2430f5;
+  --warm-surface-strong: var(--night-surface);
+  --warm-glass: #29202cf5;
+  --warm-glass-border: var(--night-line);
+  --warm-bubble: var(--assistant-bg);
+  --warm-user-bubble: var(--user-bg);
+  --warm-text: var(--night-ink);
+  --warm-text-soft: var(--night-muted);
+  --warm-muted: var(--night-dim);
+  --warm-accent: var(--night-accent);
+  --warm-accent-strong: #f5c5ce;
+  --warm-rose: #e5a5b6;
+  --warm-amber: #ebc39a;
+  --warm-shadow: 0 14px 38px #0004;
+  --warm-soft-shadow: 0 5px 18px #0003;
+  color-scheme: dark;
+  color: var(--text-primary);
+}
+
+.app.night-mode {
+  background: radial-gradient(ellipse at 100% 0%, #b76e8710, transparent 40%), var(--bg-primary);
+}
+.app.night-mode :is(.header, .settings-header, .memory-header, .events-header, .scp-header, .wb-header, .monitor-header) {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+.app.night-mode .sidebar { background: var(--bg-sidebar); }
+.app.night-mode .chat-background-layer::after { background: #211a2280; }
+.app.night-mode .chat-container:not(.harem-chat-bg) .message.assistant .message-bubble {
+  color: var(--text-primary);
+  background: var(--assistant-bg);
+  border-color: var(--border-color);
+}
+.app.night-mode .chat-container:not(.harem-chat-bg) .message.user .message-bubble {
+  color: var(--text-primary);
+  background: var(--user-bg);
+  border-color: #886075;
+}
+.app.night-mode .chat-container:not(.harem-chat-bg) :is(.message-header, .message-time, .thinking-chain-toggle) {
+  color: var(--text-secondary);
+}
+.app.night-mode :is(input, textarea, select) {
+  caret-color: var(--text-primary);
+  accent-color: var(--accent);
+}
+.app.night-mode :is(input, textarea)::placeholder { color: var(--night-dim); opacity: 1; }
+.app.night-mode :is(.message-input, .settings-content input:not([type=checkbox]):not([type=range]), .settings-content textarea, .settings-content select) {
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border-color: var(--border-color);
+}
+/* Filled actions use a darker rose, while links and focus rings stay bright. */
+.app.night-mode :is(.send-button, .btn-primary, .btn-primary-sm, .add-session-btn, .message-edit-save,
+  .export-btn, .import-btn, .task-add-btn, .task-form-submit, .btn-confirm-accept,
+  .voice-player-play-btn, .user-voice-bubble, .task-ai-badge, .tool-call-status,
+  .scroll-to-bottom-btn, .session-item.active, .tab.active, .events-tab-btn.active,
+  .wb-tab-btn.active, .wb-flag-btn, .task-tab.active, .plus-btn.active, .voice-mode-toggle.active) {
+  --accent: var(--night-action);
+  --accent-hover: #ad526d;
+  background: var(--accent);
+  color: #fff5f5;
+}
+.app.night-mode .session-item.active .session-meta { color: #fff0f3; opacity: 1; }
+.app.night-mode :is(button, input, textarea, select, a, summary):focus-visible {
+  outline: 2px solid var(--night-accent);
+  outline-offset: 3px;
+}
+
+.app.night-mode :is(.ledger-modal, .bookmark-modal, .perception-modal, .persona-evo-modal, .modal-content) {
+  color: var(--text-primary);
+}
+/* These mobile sheets used !important glass backgrounds; keep them opaque. */
+@media (max-width: 768px) {
+  .app.night-mode .ledger-overlay:not(.wish-board-overlay) .ledger-modal,
+  .app.night-mode :is(.perception-modal, .bookmark-modal, .persona-evo-modal) {
+    background: var(--bg-secondary) !important;
+  }
+}
+.app.night-mode :is(.ledger-comment, .help-text, .brain-arch-content) { color: var(--text-secondary); }
+.app.night-mode .bookmark-tab { background: var(--bg-secondary); color: var(--text-secondary); }
+.app.night-mode .bookmark-tab.active { background: var(--night-raised); color: var(--text-primary); }
+.app.night-mode :is(.xhs-comment-delivery, .group-chat-summary-card) {
+  background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-color);
+}
+
+.app.night-mode :is(.social-feed-page, .social-remote-page) {
+  --social-accent: #e8b59c;
+  --social-k: #cfbce8;
+  --social-human: #edb0bd;
+}
+.app.night-mode .social-feed-action.active { color: var(--social-human); }
+.app.night-mode :is(.social-remote-header, .social-remote-card, .social-remote-compose) {
+  background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-color);
+}
+.app.night-mode :is(.social-remote-header small, .social-remote-header label, .social-feed-site-picker,
+  .social-remote-boundary, .social-remote-card time, .social-remote-comment small, .social-remote-reactions) {
+  color: var(--text-secondary);
+}
+.app.night-mode :is(.social-remote-header select, .social-feed-site-picker select,
+  .social-remote-compose textarea, .social-remote-comment-box input) {
+  color: var(--text-primary); background: var(--bg-primary); border-color: var(--border-color);
+}
+.app.night-mode :is(.social-remote-comment, .social-remote-comment-box) { border-color: var(--border-color); }
+.app.night-mode :is(.social-remote-reactions button, .social-remote-comment button, .social-remote-comment-box button) { color: var(--social-accent); }
+.app.night-mode :is(.social-remote-error, .social-person-card-error) { color: #ffc1bb; background: #6b323750; }
+.app.night-mode .social-remote-status { color: #b9dfc3; background: #294b3550; }
+.app.night-mode :is(.social-person-card-avatar span, .social-remote-avatar) { background: var(--night-raised); color: var(--text-primary); }

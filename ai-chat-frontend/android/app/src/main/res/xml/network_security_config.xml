@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+      后端端点来自构建时的固定 IP 候选池，原生层同时校验端口与 IP 字面量。
+      这里仅负责允许家庭 LAN/Tailscale 的 HTTP 传输；访问授权仍由后端精确
+      设备 IP 白名单负责，部署地址不写入可跟踪资源。
+    -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

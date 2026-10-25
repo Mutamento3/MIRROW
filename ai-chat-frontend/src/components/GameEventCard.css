@@ -1,0 +1,16 @@
+.game-event-card { max-width: min(92%, 620px); margin: 10px auto; border: 1px solid rgba(145,116,211,.34); border-radius: 15px; background: rgba(126,96,190,.10); color: var(--text-primary, inherit); }
+.game-event-card summary { display: flex; align-items: center; gap: 8px; padding: 11px 14px; cursor: pointer; list-style: none; }
+.game-event-card summary::-webkit-details-marker { display: none; }
+.game-event-card summary strong { font-size: .93rem; font-weight: 600; }
+.game-event-card summary small { margin-left: auto; opacity: .7; white-space: nowrap; }
+.game-event-card p { margin: 0; padding: 0 14px 13px; line-height: 1.55; white-space: pre-wrap; }
+.game-event-chapters { padding: 0 12px 8px; }
+.game-event-chapters > details { margin: 5px 0; border: 1px solid rgba(145,116,211,.24); border-radius: 10px; }
+.game-event-chapters > details > summary { padding: 9px 10px; }
+.game-event-chapters ol { margin: 0 12px 12px 32px; padding: 0; }
+.game-event-chapters li { margin: 7px 0; line-height: 1.5; }
+.game-event-chapters li p { padding: 2px 0 0; opacity: .85; }
+.game-event-chapters > details > p { padding: 0 11px 10px; }
+.game-event-overall { margin: 0 12px 11px; border-top: 1px solid rgba(145,116,211,.24); }
+.game-event-overall > summary { padding: 9px 2px; opacity: .8; }
+.game-event-overall > p { padding: 0 2px 8px; }

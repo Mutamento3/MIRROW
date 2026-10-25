@@ -1,0 +1,18 @@
+/* A normal-flow row below the header never floats over the composer or send button. */
+.task-progress-panel {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 8px 14px;
+  color: #e0e0e0;
+  background: #252530;
+  font-size: 13px;
+  text-align: left;
+}
+.ta { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.ta { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ta { color: #ffd700; font-variant-numeric: tabular-nums; flex: none; }
+.ta { flex: none; color: #fff; background: #ffffff14; border: 1px solid #ffffff35; border-radius: 7px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+.ta:focus-visible { outline: 2px solid #ffd700; outline-offset: 2px; }
+.ta { margin-top: 8px; max-height: min(24vh, 220px); overflow-y: auto; overscroll-behavior: contain; }
+.task-progress-panel .task-progress-label { min-width: 0; overflow-wrap: anywhere; }
+.task-progress-panel.is-collapsed { padding-block: 5px; }
